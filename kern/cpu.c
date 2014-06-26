@@ -55,8 +55,8 @@ void cpu_init()
 	asm volatile("lgdt %0" : : "m" (gdt_pd));
 
 	// Reload all segment registers.
-	asm volatile("movw %%ax,%%gs" :: "a" (CPU_GDT_UDATA|3));
-	asm volatile("movw %%ax,%%fs" :: "a" (CPU_GDT_UDATA|3));
+//	asm volatile("movw %%ax,%%gs" :: "a" (CPU_GDT_UDATA|3));
+//	asm volatile("movw %%ax,%%fs" :: "a" (CPU_GDT_UDATA|3));
 	asm volatile("movw %%ax,%%es" :: "a" (CPU_GDT_KDATA));
 	asm volatile("movw %%ax,%%ds" :: "a" (CPU_GDT_KDATA));
 	asm volatile("movw %%ax,%%ss" :: "a" (CPU_GDT_KDATA));

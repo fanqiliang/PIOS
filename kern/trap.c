@@ -35,7 +35,6 @@ static void
 trap_init_idt(void)
 {
 	extern segdesc gdt[];
-    cprintf("I am here\n");
     int i;
     for (i = 0; i < 9; i++)
         SETGATE(idt[i], 1, CPU_GDT_KCODE, vectors[i], 3);
@@ -45,6 +44,7 @@ trap_init_idt(void)
         SETGATE(idt[i], 1, CPU_GDT_KCODE, vectors[i], 3);
     SETGATE(idt[30], 1, CPU_GDT_KCODE, vectors[30], 3);
 	
+    cprintf("trap_init succeed!\n");
 	//panic("trap_init() not implemented.");
 }
 

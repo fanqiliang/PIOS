@@ -129,7 +129,7 @@ trap_return:
     popl %ds
     addl $0x8, %esp # trapno and errcode
     iret
-1:	jmp	1b		# just spin
+#1:	jmp	1b		# just spin
 
 
 .data

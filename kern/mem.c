@@ -26,6 +26,7 @@ pageinfo *mem_pageinfo;		// Metadata array indexed by page number
 
 pageinfo *mem_freelist;		// Start of free page list
 
+pageinfo tmp_mem_pageinfo[1024*1024*1024/PAGESIZE];
 
 void mem_check(void);
 
@@ -81,9 +82,26 @@ mem_init(void)
 	// Change the code to reflect this.
 	pageinfo **freetail = &mem_freelist;
 	int i;
+
+    uint32_t page_start;
+    mem_pageinfo = tmp_mem_pageinfo;
+    memset(tmp_mem_pageinfo, 0, sizeof(pageinfo)*1024*1024*1024/PAGESIZE);
 	for (i = 0; i < mem_npage; i++) {
 		// A free page has no references to it.
 		mem_pageinfo[i].refcount = 0;
+
+        if (i == 0 || i == 1) {
+            continue;
+        }
+        page_start = mem_pi2phys(mem_pageinfo + i);
+
+        if (page_start + PAGESIZE >= MEM_IO && page_start < MEM_EXT) {
+            continue;
+        }
+
+        if (page_start + PAGESIZE >= (uint32_t)start && page_start < (uint32_t)end) {
+            continue;
+        }
 
 		// Add the page to the end of the free list.
 		*freetail = &mem_pageinfo[i];
@@ -92,7 +110,7 @@ mem_init(void)
 	*freetail = NULL;	// null-terminate the freelist
 
 	// ...and remove this when you're ready.
-	panic("mem_init() not implemented");
+	//panic("mem_init() not implemented");
 
 	// Check to make sure the page allocator seems to work correctly.
 	mem_check();
@@ -114,7 +132,13 @@ mem_alloc(void)
 {
 	// Fill this function in
 	// Fill this function in.
-	panic("mem_alloc not implemented.");
+
+    if (mem_freelist == NULL)
+        return NULL;
+    pageinfo * result = mem_freelist;
+    mem_freelist = mem_freelist->free_next;
+    return result;
+	//panic("mem_alloc not implemented.");
 }
 
 //
@@ -125,7 +149,11 @@ void
 mem_free(pageinfo *pi)
 {
 	// Fill this function in.
-	panic("mem_free not implemented.");
+
+    assert(pi->refcount == 0);
+    pi->free_next = mem_freelist;
+    mem_freelist = pi;
+	//panic("mem_free not implemented.");
 }
 
 //

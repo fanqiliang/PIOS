@@ -26,6 +26,8 @@
 // shifted function addresses can't be represented in relocation records.
 static struct gatedesc idt[256];
 
+extern uint32_t vectors[];
+
 // This "pseudo-descriptor" is needed only by the LIDT instruction,
 // to specify both the size and address of th IDT at once.
 static struct pseudodesc idt_pd = {
@@ -37,8 +39,17 @@ static void
 trap_init_idt(void)
 {
 	extern segdesc gdt[];
+    int i;
+    for (i = 0; i < 9; i++)
+        SETGATE(idt[i], 1, CPU_GDT_KCODE, vectors[i], 3);
+    for (i = 10; i < 15; i++)
+        SETGATE(idt[i], 1, CPU_GDT_KCODE, vectors[i], 3);
+    for (i = 16; i < 20; i++)
+        SETGATE(idt[i], 1, CPU_GDT_KCODE, vectors[i], 3);
+    SETGATE(idt[30], 1, CPU_GDT_KCODE, vectors[30], 3);
 	
-	panic("trap_init() not implemented.");
+    cprintf("trap_init succeed!\n");
+	//panic("trap_init() not implemented.");
 }
 
 void
@@ -214,27 +225,32 @@ trap_check(void **argsp)
 	// The asm ensures gcc uses ebp/esp to get the cookie.
 	asm volatile("" : : : "eax","ebx","ecx","edx","esi","edi");
 	assert(cookie == 0xfeedface);
+    cprintf("T_DIVIDE succeed!\n");
 
 	// Breakpoint trap
 	args.reip = after_breakpoint;
 	asm volatile("int3; after_breakpoint:");
 	assert(args.trapno == T_BRKPT);
+    cprintf("T_BRKPT succeed!\n");
 
 	// Overflow trap
 	args.reip = after_overflow;
 	asm volatile("addl %0,%0; into; after_overflow:" : : "r" (0x70000000));
 	assert(args.trapno == T_OFLOW);
+    cprintf("T_OFLOW succeed!\n");
 
 	// Bounds trap
 	args.reip = after_bound;
 	int bounds[2] = { 1, 3 };
 	asm volatile("boundl %0,%1; after_bound:" : : "r" (0), "m" (bounds[0]));
 	assert(args.trapno == T_BOUND);
+    cprintf("T_BOUND succeed!\n");
 
 	// Illegal instruction trap
 	args.reip = after_illegal;
 	asm volatile("ud2; after_illegal:");	// guaranteed to be undefined
 	assert(args.trapno == T_ILLOP);
+    cprintf("T_ILLOP succeed!\n");
 
 	// General protection fault due to invalid segment load
 	args.reip = after_gpfault;
@@ -250,6 +266,7 @@ trap_check(void **argsp)
 
 	// Make sure our stack cookie is still with us
 	assert(cookie == 0xfeedface);
+    cprintf("T_GPFLT succeed!\n");
 
 	*argsp = NULL;	// recovery mechanism not needed anymore
 }

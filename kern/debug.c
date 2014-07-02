@@ -72,7 +72,24 @@ debug_warn(const char *file, int line, const char *fmt,...)
 void gcc_noinline
 debug_trace(uint32_t ebp, uint32_t eips[DEBUG_TRACEFRAMES])
 {
-	panic("debug_trace not implemented");
+    int i ,j;
+    uint32_t *cur_ebp = (uint32_t *)ebp;
+    cprintf("Stack backtrace:\n");
+    for(i = 0; i < DEBUG_TRACEFRAMES && cur_ebp > 0; i++) {
+        cprintf("  ebp %08x eip %08x args",cur_ebp[0],cur_ebp[1]);
+        eips[i] = cur_ebp[1];
+        for(j = 0; j < 5; j++) {
+            if (*cur_ebp != cur_ebp[2+j])
+                cprintf(" %08x",cur_ebp[2 + j]);
+            else
+                break;
+        }
+        cprintf("\n");
+        cur_ebp = (uint32_t *)(*cur_ebp);
+    }
+    for(; i < DEBUG_TRACEFRAMES; i++) {
+        eips[i] = 0;
+    }
 }
 
 

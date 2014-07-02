@@ -81,9 +81,23 @@ init(void)
 	// Initialize the process management code.
 	proc_init();
 
+
 	// Lab 1: change this so it enters user() in user mode,
 	// running on the user_stack declared above,
 	// instead of just calling user() directly.
+    trapframe tf = {
+        gs: CPU_GDT_UDATA | 3,
+        fs: CPU_GDT_UDATA | 3,
+        es: CPU_GDT_UDATA | 3,
+        ds: CPU_GDT_UDATA | 3,
+        cs: CPU_GDT_UCODE | 3,
+        ss: CPU_GDT_UDATA | 3,
+        eflags: FL_IOPL_3,
+        eip: (uint32_t)user,
+        esp: (uint32_t)&user_stack[PAGESIZE]
+    };
+    trap_return(&tf);
+    cprintf("out user\n");
 	user();
 }
 

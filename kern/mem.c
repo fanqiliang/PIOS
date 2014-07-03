@@ -27,6 +27,8 @@ pageinfo *mem_pageinfo;		// Metadata array indexed by page number
 
 pageinfo *mem_freelist;		// Start of free page list
 
+spinlock *freelist_lock;
+
 pageinfo tmp_mem_pageinfo[1024*1024*1024/PAGESIZE];
 
 void mem_check(void);
@@ -136,8 +138,10 @@ mem_alloc(void)
 
     if (mem_freelist == NULL)
         return NULL;
+    spinlock_acquire(freelist_lock);
     pageinfo * result = mem_freelist;
     mem_freelist = mem_freelist->free_next;
+    spinlock_release(freelist_lock);
     return result;
 	//panic("mem_alloc not implemented.");
 }
@@ -152,8 +156,10 @@ mem_free(pageinfo *pi)
 	// Fill this function in.
 
     assert(pi->refcount == 0);
+    spinlock_acquire(freelist_lock);
     pi->free_next = mem_freelist;
     mem_freelist = pi;
+    spinlock_release(freelist_lock);
 	//panic("mem_free not implemented.");
 }
 

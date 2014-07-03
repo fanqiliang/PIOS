@@ -18,7 +18,9 @@
 /* The TRAPHANDLER macro defines a globally-visible function for handling
  * a trap.  It pushes a trap number onto the stack, then jumps to _alltraps.
  * Use TRAPHANDLER for traps where the CPU automatically pushes an error code.
- */ 
+ */
+
+
 #define TRAPHANDLER(name, num)						\
 	.globl name;		/* define global symbol for 'name' */	\
 	.type name, @function;	/* symbol type is function */		\
@@ -78,6 +80,16 @@ TRAPHANDLER_NOEC(vector29, 29)
 TRAPHANDLER_NOEC(vector30, 30)
 TRAPHANDLER_NOEC(vector31, 31)
 
+//lab2
+TRAPHANDLER_NOEC(vector32, 32)
+TRAPHANDLER_NOEC(vector33, 33)
+TRAPHANDLER_NOEC(vector36, 36)
+TRAPHANDLER_NOEC(vector39, 39)
+TRAPHANDLER_NOEC(vector46, 46)
+TRAPHANDLER_NOEC(vector48, 48)
+TRAPHANDLER_NOEC(vector49, 49)
+TRAPHANDLER_NOEC(vector50, 50)
+
 /*
  * Lab 1: Your code here for _alltraps
  */
@@ -129,7 +141,7 @@ trap_return:
     popl %ds
     addl $0x8, %esp # trapno and errcode
     iret
-#1:	jmp	1b		# just spin
+1:	jmp	1b		# just spin
 
 
 .data
@@ -167,3 +179,23 @@ vectors:
     .long vector29
     .long vector30
     .long vector31
+    .long vector32
+    .long vector33
+    .long 0
+    .long 0
+    .long vector36
+    .long 0
+    .long 0
+    .long vector39
+    .long 0
+    .long 0
+    .long 0
+    .long 0
+    .long 0
+    .long 0
+    .long vector46
+    .long 0
+    .long vector48
+    .long vector49
+    .long vector50
+

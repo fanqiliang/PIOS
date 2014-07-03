@@ -45,6 +45,8 @@ typedef struct proc {
 
 	// Save area for user-visible state when process is not running.
 	procstate	sv;
+
+    char id[100];
 } proc;
 
 #define proc_cur()	(cpu_cur()->proc)

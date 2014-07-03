@@ -41,6 +41,7 @@ cpu cpu_boot = {
 		[CPU_GDT_KDATA >> 3] = SEGDESC32(1, STA_W, 0x0,
 					0xffffffff, 0),
 
+        //lab1
         [CPU_GDT_UCODE >> 3] = SEGDESC32(1, STA_X | STA_R, 0x0,
                     0xffffffff, 3),
 

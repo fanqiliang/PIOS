@@ -38,8 +38,8 @@ spinlock_acquire(struct spinlock *lk)
         panic("spinlock_acquire failed!!!\n");
     }
     
-    while (xchg(&lk->locked, 1) != 0) {   
-    }
+    while (xchg(&lk->locked, 1) != 0)
+        ;
 
     lk->cpu = cpu_cur();
     debug_trace(read_ebp(), lk->eips);

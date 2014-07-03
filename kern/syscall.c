@@ -87,6 +87,63 @@ do_cputs(trapframe *tf, uint32_t cmd)
 	trap_return(tf);	// syscall completed
 }
 
+
+static void
+do_put(trapframe* tf){
+	procstate *cpustate  = (procstate *)tf->regs.ebx;
+	uint32_t cn = (uint32_t)tf->regs.edx;
+	proc *parent = cpu_cur()->proc;
+	proc *child =  parent->child[cn];
+	if (child == NULL) {
+		child = proc_alloc(parent, cn);
+	}
+	if (child->state != PROC_STOP) {
+		spinlock_acquire(&(parent->lock));
+		parent->state = PROC_WAIT;
+		spinlock_release(&(parent->lock));
+		proc_save(parent, tf, 0);
+	}
+	
+	if (tf->regs.eax & SYS_REGS) {
+		spinlock_acquire(&(child->lock));
+		memmove(&(child->sv.tf.regs), &(cpustate->tf.regs), sizeof(pushregs));
+		child->sv.tf.eip =  cpustate->tf.eip;
+		child->sv.tf.esp =  cpustate->tf.esp;
+
+		spinlock_release(&(child->lock));
+	}
+	if (tf->regs.eax & SYS_START) {
+		proc_ready(child);
+	}
+	trap_return(tf);
+}
+
+
+static void
+do_get(trapframe* tf) {
+	procstate *cpustate  = (procstate *)tf->regs.ebx;
+	uint32_t  cn = (uint32_t)tf->regs.edx;
+	proc *parent = cpu_cur()->proc;
+	proc *child = parent->child[cn];
+	assert(child != NULL);
+	if (child->state != PROC_STOP) {
+		proc_wait(parent, child, tf);
+	}
+	if (tf->regs.eax & SYS_REGS) {
+		memmove(&(cpustate->tf), &(child->sv.tf),sizeof(trapframe));
+	} else {
+		assert(tf->regs.eax == SYS_GET);
+		cprintf("unkonw flags , tf->regs.eax : 0x%x\n",tf->regs.eax);
+	}
+	trap_return(tf);
+}
+
+
+static void
+do_ret(trapframe *tf) {
+	proc_ret(tf, 1);
+}
+
 // Common function to handle all system calls -
 // decode the system call type and call an appropriate handler function.
 // Be sure to handle undefined system calls appropriately.
@@ -95,9 +152,13 @@ syscall(trapframe *tf)
 {
 	// EAX register holds system call command/flags
 	uint32_t cmd = tf->regs.eax;
+
 	switch (cmd & SYS_TYPE) {
 	case SYS_CPUTS:	return do_cputs(tf, cmd);
 	// Your implementations of SYS_PUT, SYS_GET, SYS_RET here...
+	case SYS_PUT: do_put(tf); break;
+	case SYS_GET: do_get(tf); break;
+	case SYS_RET: return do_ret(tf);
 	default:	return;		// handle as a regular trap
 	}
 }

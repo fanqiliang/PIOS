@@ -36,6 +36,7 @@ void mem_check(void);
 void
 mem_init(void)
 {
+    extern char start[], edata[], end[];
 	if (!cpu_onboot())	// only do once, on the boot CPU
 		return;
 
@@ -87,22 +88,26 @@ mem_init(void)
 	spinlock_init(freelist_lock);
     pageinfo **freetail = &mem_freelist;
 	int i;
-
     uint32_t page_start;
     mem_pageinfo = tmp_mem_pageinfo;
     memset(tmp_mem_pageinfo, 0, sizeof(pageinfo)*1024*1024*1024/PAGESIZE);
 	for (i = 0; i < mem_npage; i++) {
+
 		// A free page has no references to it.
 		mem_pageinfo[i].refcount = 0;
 
+        // search free page
+        // reserve page 0 and 1
         if (i == 0 || i == 1) {
             continue;
         }
         page_start = mem_pi2phys(mem_pageinfo + i);
 
+
         if (page_start + PAGESIZE >= MEM_IO && page_start < MEM_EXT) {
             continue;
         }
+
 
         if (page_start + PAGESIZE >= (uint32_t)start && page_start < (uint32_t)end) {
             continue;
@@ -137,11 +142,10 @@ mem_alloc(void)
 {
 	// Fill this function in
 	// Fill this function in.
-
     if (mem_freelist == NULL)
         return NULL;
     spinlock_acquire(freelist_lock);
-    pageinfo * result = mem_freelist;
+    pageinfo *result = mem_freelist;
     mem_freelist = mem_freelist->free_next;
     spinlock_release(freelist_lock);
     return result;
@@ -156,7 +160,6 @@ void
 mem_free(pageinfo *pi)
 {
 	// Fill this function in.
-
     assert(pi->refcount == 0);
     spinlock_acquire(freelist_lock);
     pi->free_next = mem_freelist;

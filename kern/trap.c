@@ -57,7 +57,7 @@ trap_init_idt(void)
 
 	SETGATE(idt[48], 1, CPU_GDT_KCODE, vectors[48],3);//T_SYSCALL
 	SETGATE(idt[49], 1, CPU_GDT_KCODE, vectors[49],3);//T_LTIMER
-	SETGATE(idt[50], 1, CPU_GDT_KCODE, vectors[450],3);//T_LERROR
+	SETGATE(idt[50], 1, CPU_GDT_KCODE, vectors[50],3);//T_LERROR
 	
     //cprintf("trap_init succeed!\n");
 	//panic("trap_init() not implemented.");
@@ -148,8 +148,7 @@ trap(trapframe *tf)
 	// The user-level environment may have set the DF flag,
 	// and some versions of GCC rely on DF being clear.
 	asm volatile("cld" ::: "cc");
-
-    
+   
     cli();
 
 	// If this trap was anticipated, just use the designated handler.

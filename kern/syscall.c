@@ -87,7 +87,6 @@ do_cputs(trapframe *tf, uint32_t cmd)
 	trap_return(tf);	// syscall completed
 }
 
-
 static void
 do_put(trapframe* tf){
 	procstate *cpustate  = (procstate *)tf->regs.ebx;
@@ -143,6 +142,7 @@ static void
 do_ret(trapframe *tf) {
 	proc_ret(tf, 1);
 }
+
 
 // Common function to handle all system calls -
 // decode the system call type and call an appropriate handler function.

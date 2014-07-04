@@ -95,6 +95,7 @@ TRAPHANDLER_NOEC(vector50, 50)
  */
 .globl _alltraps
 _alltraps:
+    # Build trap frame.
     pushl %ds
     pushl %es
     pushl %fs
@@ -110,8 +111,6 @@ _alltraps:
     pushl %esp
     call  trap
     addl  $4, %esp
-
-
 
 
 
@@ -135,6 +134,7 @@ trap_return:
     add  $4, %esp
     movl (%esp), %esp
     popal
+
     popl %gs
     popl %fs
     popl %es
@@ -143,7 +143,7 @@ trap_return:
     iret
 1:	jmp	1b		# just spin
 
-
+# vector tabel
 .data
 .globl vectors
 vectors:

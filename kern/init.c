@@ -56,6 +56,9 @@ init(void)
 	// Initialize the console.
 	// Can't call cprintf until after we do this!
 	cons_init();
+    //lab1
+	cprintf("1234 decimal is %o octal!\n", 1234);
+	debug_check();	
 
 	// Initialize and load the bootstrap CPU's GDT, TSS, and IDT.
 	cpu_init();

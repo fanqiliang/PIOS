@@ -19,10 +19,11 @@
 void
 spinlock_init_(struct spinlock *lk, const char *file, int line)
 {
-    lk->locked = 0;
 
     lk->file = file;
     lk->line = line;
+
+    lk->locked = 0;
     lk->cpu = NULL;
     lk->eips[0] = 0;
 }
@@ -34,6 +35,7 @@ spinlock_init_(struct spinlock *lk, const char *file, int line)
 void
 spinlock_acquire(struct spinlock *lk)
 {
+
     if (spinlock_holding(lk)) {
         panic("spinlock_acquire failed!!!\n");
     }
@@ -54,7 +56,7 @@ spinlock_release(struct spinlock *lk)
     }
 
     lk->cpu = NULL;
-    lk->eips[0];
+    lk->eips[0] = 0;
 
     xchg(&lk->locked, 0);
 }
